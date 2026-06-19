@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -15,6 +15,9 @@ public partial class TerminalControl : UserControl, IDisposable
     private Process? _process;
     private StreamWriter? _stdin;
     private bool _isDisposed;
+
+    public event Action? CloseRequested;
+    public event Action<string>? PushOutputRequested;
 
     public TerminalControl()
     {
@@ -198,5 +201,15 @@ public partial class TerminalControl : UserControl, IDisposable
             _process?.Dispose();
             _process = null;
         }
+    }
+
+    private void CloseBtn_Click(object sender, RoutedEventArgs e)
+    {
+        CloseRequested?.Invoke();
+    }
+
+    private void PushOutputBtn_Click(object sender, RoutedEventArgs e)
+    {
+        PushOutputRequested?.Invoke(TerminalOutput.Text);
     }
 }

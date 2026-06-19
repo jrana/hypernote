@@ -1,4 +1,4 @@
-﻿using System.IO;
+using System.IO;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -172,6 +172,14 @@ public partial class MainWindow : FluentWindow
 
         DarkThemeMenu.IsChecked = ThemeManager.Current == AppTheme.Dark;
         ThemeManager.ThemeChanged += OnThemeChanged;
+
+        Terminal.CloseRequested += () => {
+            if (Terminal.Visibility == Visibility.Visible)
+            {
+                ToggleTerminal();
+            }
+        };
+        Terminal.PushOutputRequested += Terminal_PushOutputRequested;
 
         RebuildRecentMenu();
 
@@ -1900,6 +1908,16 @@ public partial class MainWindow : FluentWindow
             TerminalSplitter.Visibility = Visibility.Visible;
             TerminalRow.Height = new GridLength(180);
             Terminal.FocusInput();
+        }
+    }
+
+    private void Terminal_PushOutputRequested(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return;
+        var ctx = NewTab();
+        if (ctx.Editor != null)
+        {
+            ctx.Editor.Text = text;
         }
     }
 
