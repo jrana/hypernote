@@ -1,0 +1,400 @@
+<Window x:Class="HyperNote.SettingsDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Title="Settings — HyperNote"
+        Width="640" Height="480"
+        ResizeMode="NoResize"
+        WindowStartupLocation="CenterOwner"
+        Background="{DynamicResource App.Background}"
+        Foreground="{DynamicResource App.Foreground}"
+        ShowInTaskbar="False">
+
+    <Window.Resources>
+        <!-- Section header style -->
+        <Style x:Key="SectionHeader" TargetType="TextBlock">
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize"   Value="14"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Accent}"/>
+            <Setter Property="Margin"     Value="0,4,0,8"/>
+        </Style>
+
+        <!-- Label column style -->
+        <Style x:Key="FieldLabel" TargetType="TextBlock">
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Margin"            Value="0,0,12,0"/>
+            <Setter Property="FontSize" Value="12"/>
+        </Style>
+
+        <!-- Input row margin -->
+        <Thickness x:Key="RowMargin">0,6,0,6</Thickness>
+
+        <!-- Thin separator -->
+        <Style x:Key="SectionLine" TargetType="Separator">
+            <Setter Property="Margin"     Value="0,2,0,12"/>
+            <Setter Property="Background" Value="{DynamicResource App.Border}"/>
+        </Style>
+
+        <!-- Category Item Style -->
+        <Style x:Key="CategoryItemStyle" TargetType="ListBoxItem">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Padding" Value="16,10"/>
+            <Setter Property="FontSize" Value="13"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Foreground}"/>
+            <Setter Property="HorizontalContentAlignment" Value="Left"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="ListBoxItem">
+                        <Border x:Name="Border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                Padding="{TemplateBinding Padding}"
+                                CornerRadius="4"
+                                Margin="4,2"
+                                SnapsToDevicePixels="true">
+                            <ContentPresenter HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                              VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                              SnapsToDevicePixels="{TemplateBinding SnapsToDevicePixels}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource App.Border}"/>
+                            </Trigger>
+                            <Trigger Property="IsSelected" Value="True">
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource App.Accent}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource App.Background}"/>
+                            </Trigger>
+                            <MultiTrigger>
+                                <MultiTrigger.Conditions>
+                                    <Condition Property="IsSelected" Value="True"/>
+                                    <Condition Property="Selector.IsSelectionActive" Value="False"/>
+                                </MultiTrigger.Conditions>
+                                <Setter TargetName="Border" Property="Background" Value="{DynamicResource App.Accent}"/>
+                                <Setter Property="Foreground" Value="{DynamicResource App.Background}"/>
+                            </MultiTrigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </Window.Resources>
+
+    <DockPanel Margin="0">
+        <!-- ── Bottom Button Row ─────────────────────────────────────── -->
+        <Border DockPanel.Dock="Bottom" Background="{DynamicResource App.ChromeBackground}" BorderBrush="{DynamicResource App.Border}" BorderThickness="0,1,0,0" Padding="16,12">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                <Button x:Name="CancelBtn" Content="Cancel" Width="90" Height="28"
+                        Margin="0,0,10,0" IsCancel="True"
+                        Click="CancelBtn_Click"/>
+                <Button x:Name="OkBtn"     Content="OK"     Width="90" Height="28"
+                        IsDefault="True"
+                        Click="OkBtn_Click"/>
+            </StackPanel>
+        </Border>
+
+        <!-- ── Main Grid Layout (Sidebar + Contents) ───────────────────── -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="180"/>
+                <ColumnDefinition Width="1" /> <!-- vertical border -->
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Category Sidebar -->
+            <ListBox x:Name="CategoryList" Grid.Column="0"
+                     Background="{DynamicResource App.ChromeBackground}"
+                     BorderThickness="0"
+                     ItemContainerStyle="{StaticResource CategoryItemStyle}"
+                     SelectionChanged="CategoryList_SelectionChanged"
+                     Padding="0,8">
+                <ListBoxItem Content="Appearance" IsSelected="True"/>
+                <ListBoxItem Content="Editor &amp; Formatting"/>
+                <ListBoxItem Content="Files &amp; Session"/>
+                <ListBoxItem Content="Terminal"/>
+            </ListBox>
+
+            <!-- Vertical Border Separator -->
+            <Border Grid.Column="1" Background="{DynamicResource App.Border}"/>
+
+            <!-- Right Content Panels -->
+            <Grid Grid.Column="2" Margin="24,20">
+                
+                <!-- ═══ APPEARANCE PANEL ════════════════════════════════════ -->
+                <ScrollViewer x:Name="AppearancePanel" VerticalScrollBarVisibility="Auto">
+                    <StackPanel>
+                        <TextBlock Text="Appearance Settings" Style="{StaticResource SectionHeader}"/>
+                        <Separator Style="{StaticResource SectionLine}"/>
+
+                        <!-- Theme -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Application Theme:" Style="{StaticResource FieldLabel}"/>
+                            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                <RadioButton x:Name="ThemeLight" Content="Light" GroupName="Theme"
+                                             VerticalContentAlignment="Center" Margin="0,0,16,0"
+                                             Checked="ThemeRadio_Checked"/>
+                                <RadioButton x:Name="ThemeDark"  Content="Dark"  GroupName="Theme"
+                                             VerticalContentAlignment="Center"
+                                             Checked="ThemeRadio_Checked"/>
+                            </StackPanel>
+                        </Grid>
+
+                        <!-- Show Line Numbers -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Show line numbers:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="LineNumbersBox" Grid.Column="1" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Show Minimap -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Show scroll minimap:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="MinimapBox" Grid.Column="1" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Show Whitespace -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Show whitespace characters:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="WhitespaceBox" Grid.Column="1" VerticalAlignment="Center"
+                                       ToolTip="Displays space, tab, and newline symbols in the editor"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ═══ EDITOR & FORMATTING PANEL ═══════════════════════════ -->
+                <ScrollViewer x:Name="EditorPanel" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="Editor &amp; Formatting Settings" Style="{StaticResource SectionHeader}"/>
+                        <Separator Style="{StaticResource SectionLine}"/>
+
+                        <!-- Font Family -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Font family:" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="FontFamilyBox" Grid.Column="1" Height="26" IsEditable="True"/>
+                        </Grid>
+
+                        <!-- Font Size -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="80"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Font size:" Style="{StaticResource FieldLabel}"/>
+                            <TextBox   x:Name="FontSizeBox" Grid.Column="1" Height="26"
+                                       VerticalContentAlignment="Center" Padding="4,0"/>
+                            <TextBlock Grid.Column="2" Text=" pt" Style="{StaticResource FieldLabel}"/>
+                        </Grid>
+
+                        <!-- Word Wrap -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Word wrap:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="WordWrapBox" Grid.Column="1" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Highlight Current Line -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Highlight current line:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="HighlightLineBox" Grid.Column="1" VerticalAlignment="Center"
+                                       ToolTip="Highlights the editor line where the cursor is currently placed"/>
+                        </Grid>
+
+                        <!-- Convert Tabs to Spaces -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Convert tabs to spaces:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="TabsToSpacesBox" Grid.Column="1" VerticalAlignment="Center"/>
+                        </Grid>
+
+                        <!-- Indent Width -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Indent width:" Style="{StaticResource FieldLabel}"/>
+                            <TextBox   x:Name="IndentWidthBox" Grid.Column="1" Height="26"
+                                       VerticalContentAlignment="Center" Padding="4,0"/>
+                            <TextBlock Grid.Column="2" Text=" spaces" Style="{StaticResource FieldLabel}"/>
+                        </Grid>
+
+                        <!-- Enable Auto Brace Completion -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Auto-brace completion:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="AutoBracesBox" Grid.Column="1" VerticalAlignment="Center"
+                                       ToolTip="Automatically inserts closing quotes, brackets, and braces"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ═══ FILES & SESSION PANEL ═══════════════════════════════ -->
+                <ScrollViewer x:Name="FilesPanel" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="Files &amp; Session Settings" Style="{StaticResource SectionHeader}"/>
+                        <Separator Style="{StaticResource SectionLine}"/>
+
+                        <!-- Remember open files -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Remember open files:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="RememberFilesBox" Grid.Column="1" VerticalAlignment="Center"
+                                       ToolTip="Re-open the last session's tabs when the app starts"/>
+                        </Grid>
+
+                        <!-- Max Recent Files -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Max recent files:" Style="{StaticResource FieldLabel}"/>
+                            <TextBox   x:Name="MaxRecentBox" Grid.Column="1" Height="26"
+                                       VerticalContentAlignment="Center" Padding="4,0"/>
+                            <TextBlock Grid.Column="2" Text=" files" Style="{StaticResource FieldLabel}"/>
+                        </Grid>
+
+                        <!-- Large-file threshold -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Large-file threshold:" Style="{StaticResource FieldLabel}"/>
+                            <TextBox   x:Name="LargeFileThresholdBox" Grid.Column="1" Height="26"
+                                       VerticalContentAlignment="Center" Padding="4,0"/>
+                            <TextBlock Grid.Column="2" Text=" MB" Style="{StaticResource FieldLabel}"/>
+                        </Grid>
+
+                        <!-- Auto-Save -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Enable Auto-Save:" Style="{StaticResource FieldLabel}"/>
+                            <CheckBox  x:Name="AutoSaveBox" Grid.Column="1" VerticalAlignment="Center"
+                                       ToolTip="Automatically save modifications to saved files on a background timer"/>
+                        </Grid>
+
+                        <!-- Auto-Save Interval -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Auto-Save interval:" Style="{StaticResource FieldLabel}"/>
+                            <TextBox   x:Name="AutoSaveIntervalBox" Grid.Column="1" Height="26"
+                                       VerticalContentAlignment="Center" Padding="4,0"/>
+                            <TextBlock Grid.Column="2" Text=" seconds" Style="{StaticResource FieldLabel}"/>
+                        </Grid>
+
+                        <!-- Default Encoding -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Default encoding:" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="DefaultEncodingBox" Grid.Column="1" Height="26" IsEditable="False"/>
+                        </Grid>
+
+                        <!-- Default Line Endings -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Default line endings:" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="DefaultLineEndingBox" Grid.Column="1" Height="26" IsEditable="False"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+
+                <!-- ═══ TERMINAL PANEL ══════════════════════════════════════ -->
+                <ScrollViewer x:Name="TerminalPanel" VerticalScrollBarVisibility="Auto" Visibility="Collapsed">
+                    <StackPanel>
+                        <TextBlock Text="Integrated Terminal Settings" Style="{StaticResource SectionHeader}"/>
+                        <Separator Style="{StaticResource SectionLine}"/>
+
+                        <!-- Terminal Shell Path -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Shell executable path:" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="TerminalShellBox" Grid.Column="1" Height="26" IsEditable="True"/>
+                        </Grid>
+
+                        <!-- Terminal Font Family -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Font family:" Style="{StaticResource FieldLabel}"/>
+                            <ComboBox x:Name="TerminalFontFamilyBox" Grid.Column="1" Height="26" IsEditable="True"/>
+                        </Grid>
+
+                        <!-- Terminal Font Size -->
+                        <Grid Margin="{StaticResource RowMargin}">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="180"/>
+                                <ColumnDefinition Width="60"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Font size:" Style="{StaticResource FieldLabel}"/>
+                            <TextBox   x:Name="TerminalFontSizeBox" Grid.Column="1" Height="26"
+                                       VerticalContentAlignment="Center" Padding="4,0"/>
+                            <TextBlock Grid.Column="2" Text=" pt" Style="{StaticResource FieldLabel}"/>
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+
+            </Grid>
+        </Grid>
+    </DockPanel>
+</Window>

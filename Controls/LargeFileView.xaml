@@ -1,0 +1,65 @@
+﻿<UserControl x:Class="HyperNote.Controls.LargeFileView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:HyperNote.Controls"
+             xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit">
+    <DockPanel>
+
+        <!-- Banner: large-file mode notice, index progress, encoding, go-to-line -->
+        <Border DockPanel.Dock="Top"
+                Background="{DynamicResource Banner.Background}"
+                Padding="8,4">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <!-- Clear All Button -->
+                    <Button x:Name="ClearAllBtn" Content="Clear All" Margin="0,0,12,0" Padding="8,2" Click="ClearAllBtn_Click" />
+
+                    <TextBlock Text="Encoding:" VerticalAlignment="Center"
+                               Foreground="{DynamicResource Banner.Foreground}" Margin="0,0,6,0"/>
+                    <ComboBox x:Name="EncodingBox" Width="100" Margin="0,0,16,0" SelectionChanged="EncodingBox_SelectionChanged">
+                        <ComboBoxItem Content="UTF-8" Tag="utf-8"/>
+                        <ComboBoxItem Content="UTF-16 LE" Tag="utf-16le"/>
+                        <ComboBoxItem Content="UTF-16 BE" Tag="utf-16be"/>
+                        <ComboBoxItem Content="ANSI" Tag="ansi"/>
+                    </ComboBox>
+
+                    <TextBlock Text="Go to line:" VerticalAlignment="Center"
+                               Foreground="{DynamicResource Banner.Foreground}" Margin="0,0,6,0"/>
+                    <TextBox x:Name="GotoBox" Width="90" KeyDown="GotoBox_KeyDown"/>
+                </StackPanel>
+                
+                <TextBlock x:Name="BannerText"
+                           Foreground="{DynamicResource Banner.Foreground}"
+                           VerticalAlignment="Center"
+                           Text="Large file mode (editing): content is streamed from disk."/>
+            </DockPanel>
+        </Border>
+
+        <!-- Main Workspace Area -->
+        <Grid>
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+            
+            <avalonEdit:TextEditor x:Name="Editor"
+                                   Grid.Column="0"
+                                   Background="{DynamicResource Editor.Background}"
+                                   Foreground="{DynamicResource Editor.Foreground}"
+                                   FontFamily="Consolas"
+                                   FontSize="13"
+                                   ShowLineNumbers="True"
+                                   IsReadOnly="False"
+                                   VerticalScrollBarVisibility="Hidden"
+                                   HorizontalScrollBarVisibility="Auto"/>
+                                   
+            <ScrollBar x:Name="VScrollBar"
+                       Grid.Column="1"
+                       Orientation="Vertical"
+                       Minimum="0"
+                       Scroll="VScrollBar_Scroll"
+                       SizeChanged="VScrollBar_SizeChanged"/>
+        </Grid>
+
+    </DockPanel>
+</UserControl>

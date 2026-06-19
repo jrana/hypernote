@@ -1,0 +1,303 @@
+﻿<UserControl x:Class="HyperNote.Controls.ImageViewerControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:HyperNote.Controls"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="1000"
+             x:Name="ImageViewerControlRoot"
+             Background="{DynamicResource App.Background}">
+
+    <UserControl.Resources>
+        <!-- Checkerboard pattern brush for image transparency background -->
+        <DrawingBrush x:Key="CheckerboardBrush" TileMode="Tile" Viewport="0,0,16,16" ViewportUnits="Absolute">
+            <DrawingBrush.Drawing>
+                <DrawingGroup>
+                    <GeometryDrawing Brush="{DynamicResource Checkerboard.Light}">
+                        <GeometryDrawing.Geometry>
+                            <RectangleGeometry Rect="0,0,16,16" />
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                    <GeometryDrawing Brush="{DynamicResource Checkerboard.Dark}">
+                        <GeometryDrawing.Geometry>
+                            <GeometryGroup>
+                                <RectangleGeometry Rect="0,0,8,8" />
+                                <RectangleGeometry Rect="8,8,8,8" />
+                            </GeometryGroup>
+                        </GeometryDrawing.Geometry>
+                    </GeometryDrawing>
+                </DrawingGroup>
+            </DrawingBrush.Drawing>
+        </DrawingBrush>
+
+        <!-- Style for toolbar buttons to make them uniform and clean -->
+        <Style x:Key="ToolbarButtonStyle" TargetType="Button" BasedOn="{StaticResource {x:Type Button}}">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Foreground}"/>
+        </Style>
+
+        <Style x:Key="ToolbarToggleStyle" TargetType="ToggleButton" BasedOn="{StaticResource {x:Type ToggleButton}}">
+            <Setter Property="Padding" Value="8,4"/>
+            <Setter Property="Margin" Value="2,0"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="Foreground" Value="{DynamicResource App.Foreground}"/>
+        </Style>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/> <!-- Row 0: Main Toolbar -->
+            <RowDefinition Height="Auto"/> <!-- Row 1: Edit Toolbar -->
+            <RowDefinition Height="*"/>    <!-- Row 2: Main Workspace -->
+        </Grid.RowDefinitions>
+
+        <!-- Row 0: Toolbar -->
+        <Border Grid.Row="0"
+                Background="{DynamicResource App.ChromeBackground}"
+                BorderBrush="{DynamicResource App.Border}"
+                BorderThickness="0,0,0,1"
+                Padding="6,4">
+            <DockPanel LastChildFill="False">
+                <StackPanel Orientation="Horizontal" DockPanel.Dock="Left">
+                    <!-- Zoom Actions -->
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Click="BtnZoomOut_Click" ToolTip="Zoom Out (Ctrl+Wheel Down)">
+                        <TextBlock Text="➖" FontSize="11"/>
+                    </Button>
+                    <TextBlock x:Name="TxtZoomPercent" Text="100%" Width="45" TextAlignment="Center" VerticalAlignment="Center" Foreground="{DynamicResource App.Foreground}" FontWeight="SemiBold" FontSize="11"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Click="BtnZoomIn_Click" ToolTip="Zoom In (Ctrl+Wheel Up)">
+                        <TextBlock Text="➕" FontSize="11"/>
+                    </Button>
+
+                    <Border Width="1" Height="14" Background="{DynamicResource App.Border}" Margin="6,0"/>
+
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Content="1:1" Click="BtnZoomActual_Click" ToolTip="Actual Size (100%)"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Content="Fit" Click="BtnZoomFit_Click" ToolTip="Fit to Screen"/>
+
+                    <Border Width="1" Height="14" Background="{DynamicResource App.Border}" Margin="6,0"/>
+
+                    <!-- Rotate Actions -->
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Content="↶ Rotate Left" Click="BtnRotateLeft_Click" ToolTip="Rotate 90° Counter-Clockwise"/>
+                    <Button Style="{StaticResource ToolbarButtonStyle}" Content="↷ Rotate Right" Click="BtnRotateRight_Click" ToolTip="Rotate 90° Clockwise"/>
+
+                    <Border Width="1" Height="14" Background="{DynamicResource App.Border}" Margin="6,0"/>
+
+                    <!-- Edit Toggle Button -->
+                    <ToggleButton x:Name="BtnToggleEdit"
+                                  Style="{StaticResource ToolbarToggleStyle}"
+                                  Content="✏ Edit"
+                                  Click="BtnToggleEdit_Click"
+                                  ToolTip="Toggle Image Editor Options"/>
+                </StackPanel>
+
+                <!-- Metadata toggle (Right aligned) -->
+                <ToggleButton x:Name="BtnToggleMetadata"
+                              Style="{StaticResource ToolbarToggleStyle}"
+                              Content="ℹ Info"
+                              IsChecked="True"
+                              Click="BtnToggleMetadata_Click"
+                              DockPanel.Dock="Right"
+                              ToolTip="Toggle Image Details Sidebar"/>
+            </DockPanel>
+        </Border>
+
+        <!-- Row 1: Edit Toolbar -->
+        <Border Grid.Row="1"
+                x:Name="EditToolbar"
+                Background="{DynamicResource App.ChromeBackground}"
+                BorderBrush="{DynamicResource App.Border}"
+                BorderThickness="0,0,0,1"
+                Padding="8,6"
+                Visibility="Collapsed">
+            <WrapPanel Orientation="Horizontal" VerticalAlignment="Center">
+                <!-- Crop Controls -->
+                <TextBlock Text="Crop:" VerticalAlignment="Center" Foreground="{DynamicResource App.Foreground}" FontWeight="SemiBold" Margin="4,0,8,0" FontSize="11"/>
+                <ToggleButton x:Name="BtnCropMode" Content="Select Area" Style="{StaticResource ToolbarToggleStyle}" Click="BtnCropMode_Click" ToolTip="Enable cropping selection overlay"/>
+                <ComboBox x:Name="CbAspectRatio" Margin="4,0" Width="100" SelectedIndex="0" SelectionChanged="CbAspectRatio_SelectionChanged" ToolTip="Crop aspect ratio constraint">
+                    <ComboBoxItem Content="Freeform"/>
+                    <ComboBoxItem Content="1:1 Square"/>
+                    <ComboBoxItem Content="16:9 Wide"/>
+                    <ComboBoxItem Content="4:3 Standard"/>
+                </ComboBox>
+                <Button x:Name="BtnApplyCrop" Content="✔ Crop" Style="{StaticResource ToolbarButtonStyle}" Click="BtnApplyCrop_Click" Foreground="LightGreen" FontWeight="Bold" Visibility="Collapsed" ToolTip="Commit cropping"/>
+                <Button x:Name="BtnCancelCrop" Content="✖ Cancel" Style="{StaticResource ToolbarButtonStyle}" Click="BtnCancelCrop_Click" Foreground="Tomato" Visibility="Collapsed" ToolTip="Discard cropping selection"/>
+
+                <Border Width="1" Height="16" Background="{DynamicResource App.Border}" Margin="10,0"/>
+
+                <!-- Resize Controls -->
+                <TextBlock Text="Resize (px):" VerticalAlignment="Center" Foreground="{DynamicResource App.Foreground}" FontWeight="SemiBold" Margin="4,0,8,0" FontSize="11"/>
+                <TextBox x:Name="TxtResizeWidth" Width="55" VerticalAlignment="Center" TextAlignment="Center" Margin="2,0" TextChanged="TxtResizeWidth_TextChanged" ToolTip="Target width in pixels"/>
+                <TextBlock Text="×" VerticalAlignment="Center" Foreground="{DynamicResource App.Foreground}" Margin="2,0"/>
+                <TextBox x:Name="TxtResizeHeight" Width="55" VerticalAlignment="Center" TextAlignment="Center" Margin="2,0" TextChanged="TxtResizeHeight_TextChanged" ToolTip="Target height in pixels"/>
+                <CheckBox x:Name="ChkLockAspect" Content="🔗 Lock" IsChecked="True" VerticalAlignment="Center" Margin="6,0,4,0" Foreground="{DynamicResource App.Foreground}" ToolTip="Maintain aspect ratio"/>
+                <Button x:Name="BtnApplyResize" Content="✔ Resize" Style="{StaticResource ToolbarButtonStyle}" Click="BtnApplyResize_Click" ToolTip="Apply target resolution"/>
+
+                <Border Width="1" Height="16" Background="{DynamicResource App.Border}" Margin="10,0"/>
+
+                <!-- Flip Controls -->
+                <TextBlock Text="Flip:" VerticalAlignment="Center" Foreground="{DynamicResource App.Foreground}" FontWeight="SemiBold" Margin="4,0,8,0" FontSize="11"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="↔ Horizontal" Click="BtnFlipHorizontal_Click" ToolTip="Flip horizontally"/>
+                <Button Style="{StaticResource ToolbarButtonStyle}" Content="↕ Vertical" Click="BtnFlipVertical_Click" ToolTip="Flip vertically"/>
+
+                <Border Width="1" Height="16" Background="{DynamicResource App.Border}" Margin="10,0"/>
+
+                <!-- Adjustments -->
+                <TextBlock Text="Bright:" VerticalAlignment="Center" Foreground="{DynamicResource App.Foreground}" FontWeight="SemiBold" Margin="4,0,4,0" FontSize="11"/>
+                <Slider x:Name="SldBrightness" Width="80" Minimum="-100" Maximum="100" Value="0" VerticalAlignment="Center" ValueChanged="SldBrightness_ValueChanged" ToolTip="Adjust brightness"/>
+                <TextBlock x:Name="TxtBrightnessVal" Text="0" Width="22" Foreground="{DynamicResource App.Foreground}" VerticalAlignment="Center" FontSize="10" Margin="2,0,4,0"/>
+
+                <TextBlock Text="Contrast:" VerticalAlignment="Center" Foreground="{DynamicResource App.Foreground}" FontWeight="SemiBold" Margin="4,0,4,0" FontSize="11"/>
+                <Slider x:Name="SldContrast" Width="80" Minimum="-100" Maximum="100" Value="0" VerticalAlignment="Center" ValueChanged="SldContrast_ValueChanged" ToolTip="Adjust contrast"/>
+                <TextBlock x:Name="TxtContrastVal" Text="0" Width="22" Foreground="{DynamicResource App.Foreground}" VerticalAlignment="Center" FontSize="10" Margin="2,0,4,0"/>
+
+                <Button x:Name="BtnGrayscale" Content="Grayscale" Style="{StaticResource ToolbarButtonStyle}" Click="BtnGrayscale_Click" ToolTip="Convert to black and white"/>
+
+                <Border Width="1" Height="16" Background="{DynamicResource App.Border}" Margin="10,0"/>
+
+                <!-- Undo / Redo -->
+                <Button x:Name="BtnUndo" Content="↩ Undo" Style="{StaticResource ToolbarButtonStyle}" Click="BtnUndo_Click" IsEnabled="False" ToolTip="Undo last edit (Ctrl+Z)"/>
+                <Button x:Name="BtnRedo" Content="↪ Redo" Style="{StaticResource ToolbarButtonStyle}" Click="BtnRedo_Click" IsEnabled="False" ToolTip="Redo last undone edit (Ctrl+Y)"/>
+            </WrapPanel>
+        </Border>
+
+        <!-- Row 2: Workspace Grid (Image Viewport + Splitter + Metadata) -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" x:Name="ImageColumn"/>
+                <ColumnDefinition Width="Auto" x:Name="SplitterColumn"/>
+                <ColumnDefinition Width="300" x:Name="MetadataColumn"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Column 0: Image Canvas -->
+            <Border Grid.Column="0"
+                    Background="{StaticResource CheckerboardBrush}"
+                    ClipToBounds="True">
+                <Grid>
+                    <ScrollViewer x:Name="ImgScrollViewer"
+                                  HorizontalScrollBarVisibility="Hidden"
+                                  VerticalScrollBarVisibility="Hidden"
+                                  Background="Transparent"
+                                  Focusable="True"
+                                  PreviewMouseWheel="ImgScrollViewer_PreviewMouseWheel"
+                                  PreviewMouseDown="ImgScrollViewer_PreviewMouseDown"
+                                  PreviewMouseUp="ImgScrollViewer_PreviewMouseUp"
+                                  PreviewMouseMove="ImgScrollViewer_PreviewMouseMove">
+                        <!-- Grid holds image and centers it -->
+                        <Grid x:Name="ImageGrid" HorizontalAlignment="Center" VerticalAlignment="Center">
+                            <Image x:Name="DisplayImage"
+                                   RenderOptions.BitmapScalingMode="HighQuality"
+                                   Stretch="None">
+                                <Image.LayoutTransform>
+                                    <TransformGroup>
+                                        <ScaleTransform x:Name="ImageScale" ScaleX="1.0" ScaleY="1.0"/>
+                                        <RotateTransform x:Name="ImageRotate" Angle="0"/>
+                                    </TransformGroup>
+                                </Image.LayoutTransform>
+                            </Image>
+
+                            <!-- Crop overlay sits exactly over the image and moves with it -->
+                            <Canvas x:Name="CropCanvas"
+                                    Visibility="Collapsed"
+                                    Background="Transparent"
+                                    HorizontalAlignment="Stretch"
+                                    VerticalAlignment="Stretch"
+                                    MouseDown="CropCanvas_MouseDown"
+                                    MouseMove="CropCanvas_MouseMove"
+                                    MouseUp="CropCanvas_MouseUp">
+                                <Path x:Name="CropMask" Fill="#90000000"/>
+
+                                <!-- White dashed selection frame with Rule of Thirds guidelines -->
+                                <Border x:Name="CropBox"
+                                        BorderBrush="#FFFFFF"
+                                        BorderThickness="1.5"
+                                        Background="Transparent"
+                                        Visibility="Collapsed"
+                                        SnapsToDevicePixels="True">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                            <RowDefinition Height="*"/>
+                                        </Grid.RowDefinitions>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="*"/>
+                                        </Grid.ColumnDefinitions>
+                                        
+                                        <!-- Guidelines -->
+                                        <Border Grid.Row="0" Grid.Column="0" BorderBrush="#35FFFFFF" BorderThickness="0,0,1,1"/>
+                                        <Border Grid.Row="0" Grid.Column="1" BorderBrush="#35FFFFFF" BorderThickness="0,0,1,1"/>
+                                        <Border Grid.Row="0" Grid.Column="2" BorderBrush="#35FFFFFF" BorderThickness="0,0,0,1"/>
+                                        <Border Grid.Row="1" Grid.Column="0" BorderBrush="#35FFFFFF" BorderThickness="0,0,1,1"/>
+                                        <Border Grid.Row="1" Grid.Column="1" BorderBrush="#35FFFFFF" BorderThickness="0,0,1,1"/>
+                                        <Border Grid.Row="1" Grid.Column="2" BorderBrush="#35FFFFFF" BorderThickness="0,0,0,1"/>
+                                        <Border Grid.Row="2" Grid.Column="0" BorderBrush="#35FFFFFF" BorderThickness="0,0,1,0"/>
+                                        <Border Grid.Row="2" Grid.Column="1" BorderBrush="#35FFFFFF" BorderThickness="0,0,1,0"/>
+                                    </Grid>
+                                </Border>
+                            </Canvas>
+                        </Grid>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+
+            <!-- Column 1: Grid Splitter -->
+            <GridSplitter x:Name="MetadataSplitter"
+                          Grid.Column="1"
+                          Width="4"
+                          HorizontalAlignment="Stretch"
+                          VerticalAlignment="Stretch"
+                          Background="{DynamicResource App.Border}"
+                          ResizeBehavior="PreviousAndNext"/>
+
+            <!-- Column 2: Metadata Panel -->
+            <Border x:Name="MetadataPanel"
+                    Grid.Column="2"
+                    Background="{DynamicResource App.ChromeBackground}"
+                    BorderBrush="{DynamicResource App.Border}"
+                    BorderThickness="1,0,0,0">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <!-- Header -->
+                    <Border Grid.Row="0"
+                            BorderBrush="{DynamicResource App.Border}"
+                            BorderThickness="0,0,0,1"
+                            Padding="12,10">
+                        <Grid>
+                            <TextBlock Text="Image Details"
+                                       FontWeight="SemiBold"
+                                       FontSize="12"
+                                       Foreground="{DynamicResource App.Foreground}"
+                                       VerticalAlignment="Center"/>
+                            <Button x:Name="BtnCloseMetadata"
+                                    Content="✕"
+                                    HorizontalAlignment="Right"
+                                    Padding="4,2"
+                                    Background="Transparent"
+                                    BorderThickness="0"
+                                    Foreground="{DynamicResource App.Foreground}"
+                                    Cursor="Hand"
+                                    Click="BtnCloseMetadata_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <!-- Scrollable metadata stack -->
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Padding="12,4,12,12">
+                        <StackPanel x:Name="MetadataStackPanel">
+                            <!-- Populated in code-behind -->
+                        </StackPanel>
+                    </ScrollViewer>
+                </Grid>
+            </Border>
+        </Grid>
+    </Grid>
+</UserControl>

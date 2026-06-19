@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>HyperNote</AssemblyName>
+    <RootNamespace>HyperNote</RootNamespace>
+    <AssemblyTitle>HyperNote</AssemblyTitle>
+    <Product>HyperNote</Product>
+    <Version>1.0.0</Version>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Code editor: line numbers, syntax highlighting, folding, search -->
+    <PackageReference Include="AvalonEdit" Version="6.3.0.90" />
+    <!-- Markdown -> HTML for preview -->
+    <PackageReference Include="Markdig" Version="0.37.0" />
+    <!-- Embedded browser: markdown preview rendering + built-in PDF viewer -->
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2592.51" />
+    <!-- Fluent Design System: FluentWindow, SymbolIcon, NavigationView, Mica/Acrylic -->
+    <PackageReference Include="WPF-UI" Version="3.*" />
+  </ItemGroup>
+
+</Project>

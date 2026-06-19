@@ -1,0 +1,17 @@
+# Build directories
+bin/
+obj/
+
+# Visual Studio / Rider cache and settings
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Large test files
+large_500k.txt
+large_text.txt
+
+# Scratch folders
+scratch/

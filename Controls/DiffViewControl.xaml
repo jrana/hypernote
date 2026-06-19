@@ -1,0 +1,80 @@
+﻿<UserControl x:Class="HyperNote.Controls.DiffViewControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:avalonEdit="clr-namespace:ICSharpCode.AvalonEdit;assembly=ICSharpCode.AvalonEdit"
+             Background="{DynamicResource App.Background}">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Toolbar -->
+        <Border Grid.Row="0" Background="{DynamicResource App.ChromeBackground}" BorderBrush="{DynamicResource App.Border}" BorderThickness="0,0,0,1" Padding="12,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                
+                <!-- Left File Select -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal">
+                    <TextBlock Text="Left File:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource App.Foreground}" FontWeight="SemiBold"/>
+                    <ComboBox x:Name="LeftFileCombo" Width="200" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Button x:Name="LeftBrowseBtn" Content="Browse…" Padding="8,4" Click="LeftBrowse_Click"/>
+                </StackPanel>
+
+                <!-- Options -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" Margin="16,0">
+                    <CheckBox x:Name="IgnoreWhitespaceCheck" Content="Ignore Whitespace" Margin="0,0,12,0" Foreground="{DynamicResource App.Foreground}" VerticalAlignment="Center"/>
+                    <CheckBox x:Name="IgnoreCaseCheck" Content="Ignore Case" Margin="0,0,12,0" Foreground="{DynamicResource App.Foreground}" VerticalAlignment="Center"/>
+                    <Button x:Name="CompareBtn" Content="Compare" Padding="12,4" FontWeight="Bold" Click="Compare_Click" Background="{DynamicResource App.Accent}" Foreground="White" BorderThickness="0" Cursor="Hand"/>
+                </StackPanel>
+
+                <!-- Right File Select -->
+                <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Right">
+                    <TextBlock Text="Right File:" VerticalAlignment="Center" Margin="0,0,8,0" Foreground="{DynamicResource App.Foreground}" FontWeight="SemiBold"/>
+                    <ComboBox x:Name="RightFileCombo" Width="200" VerticalAlignment="Center" Margin="0,0,8,0"/>
+                    <Button x:Name="RightBrowseBtn" Content="Browse…" Padding="8,4" Click="RightBrowse_Click"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+
+        <!-- Editors Panel -->
+        <Grid Grid.Row="1">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Left Panel -->
+            <Grid Grid.Column="0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{DynamicResource App.ChromeBackground}" BorderBrush="{DynamicResource App.Border}" BorderThickness="0,0,0,1" Padding="8,4">
+                    <TextBlock x:Name="LeftPathText" Text="(no file selected)" Foreground="{DynamicResource Editor.LineNumbers}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                </Border>
+                <avalonEdit:TextEditor x:Name="LeftEditor" Grid.Row="1" IsReadOnly="True" ShowLineNumbers="True" FontFamily="Consolas" FontSize="12" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+
+            <!-- Splitter -->
+            <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Background="{DynamicResource App.Border}"/>
+
+            <!-- Right Panel -->
+            <Grid Grid.Column="2">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+                <Border Grid.Row="0" Background="{DynamicResource App.ChromeBackground}" BorderBrush="{DynamicResource App.Border}" BorderThickness="0,0,0,1" Padding="8,4">
+                    <TextBlock x:Name="RightPathText" Text="(no file selected)" Foreground="{DynamicResource Editor.LineNumbers}" FontSize="11" TextTrimming="CharacterEllipsis"/>
+                </Border>
+                <avalonEdit:TextEditor x:Name="RightEditor" Grid.Row="1" IsReadOnly="True" ShowLineNumbers="True" FontFamily="Consolas" FontSize="12" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+            </Grid>
+        </Grid>
+    </Grid>
+</UserControl>
