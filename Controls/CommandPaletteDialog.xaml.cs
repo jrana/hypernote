@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Windows;
@@ -26,6 +26,7 @@ public partial class CommandPaletteDialog : Window
         new() { Name = "File: Save", Shortcut = "Ctrl+S", Id = "File.Save" },
         new() { Name = "File: Save As...", Shortcut = "Ctrl+Shift+S", Id = "File.SaveAs" },
         new() { Name = "File: Close Tab", Shortcut = "Ctrl+W", Id = "File.CloseTab" },
+        new() { Name = "File: Close All Tabs", Shortcut = "Ctrl+Shift+W", Id = "File.CloseAllTabs" },
         new() { Name = "File: Exit", Id = "File.Exit" },
         
         // Edit

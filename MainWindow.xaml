@@ -20,6 +20,7 @@
         <CommandBinding Command="SaveAs" Executed="SaveAs_Executed" CanExecute="Save_CanExecute"/>
         <CommandBinding Command="Print"  Executed="Print_Executed"  CanExecute="Print_CanExecute"/>
         <CommandBinding Command="Close"  Executed="CloseTab_Executed"/>
+        <CommandBinding Command="{x:Static local:MainWindow.CloseAllTabsCommand}" Executed="CloseAllTabs_Executed"/>
         <CommandBinding Command="Find"    Executed="Find_Executed"    CanExecute="Find_CanExecute"/>
         <CommandBinding Command="Replace" Executed="Replace_Executed" CanExecute="Find_CanExecute"/>
         <CommandBinding Command="{x:Static local:MainWindow.FindNextCommand}"
@@ -58,6 +59,7 @@
 
     <ui:FluentWindow.InputBindings>
         <KeyBinding Key="W" Modifiers="Control" Command="Close"/>
+        <KeyBinding Key="W" Modifiers="Control+Shift" Command="{x:Static local:MainWindow.CloseAllTabsCommand}"/>
         <KeyBinding Key="S" Modifiers="Control+Shift" Command="SaveAs"/>
         <KeyBinding Key="P" Modifiers="Control" Command="Print"/>
         <KeyBinding Key="V" Modifiers="Control+Shift"
@@ -256,8 +258,10 @@
                 </MenuItem>
                 <Separator/>
                 <MenuItem Header="_Close Tab" Command="Close" InputGestureText="Ctrl+W">
-
                     <MenuItem.Icon><ui:SymbolIcon Symbol="Dismiss24"/></MenuItem.Icon>
+                </MenuItem>
+                <MenuItem Header="Close _All Tabs" Command="{x:Static local:MainWindow.CloseAllTabsCommand}" InputGestureText="Ctrl+Shift+W">
+                    <MenuItem.Icon><ui:SymbolIcon Symbol="DismissSquareMultiple20"/></MenuItem.Icon>
                 </MenuItem>
                 <MenuItem Header="E_xit" Click="Exit_Click">
                     <MenuItem.Icon><ui:SymbolIcon Symbol="Power24"/></MenuItem.Icon>

@@ -104,6 +104,9 @@ public partial class MainWindow : FluentWindow
     public static readonly RoutedUICommand ClearBookmarksCommand =
         new("Clear Bookmarks", "ClearBookmarks", typeof(MainWindow));
 
+    public static readonly RoutedUICommand CloseAllTabsCommand =
+        new("Close All Tabs", "CloseAllTabs", typeof(MainWindow));
+
 
 
     private static readonly MarkdownPipeline MdPipeline =
@@ -302,6 +305,28 @@ public partial class MainWindow : FluentWindow
         tab.Tag = ctx;
         closeBtn.Click += (_, _) => CloseTab(ctx);
 
+        var tabMenu = new ContextMenu();
+        
+        var closeTabItem = new MenuItem 
+        { 
+            Header = "Close Tab", 
+            InputGestureText = "Ctrl+W",
+            Icon = new Wpf.Ui.Controls.SymbolIcon { Symbol = Wpf.Ui.Controls.SymbolRegular.Dismiss20 }
+        };
+        closeTabItem.Click += (_, _) => CloseTab(ctx);
+        tabMenu.Items.Add(closeTabItem);
+
+        var closeAllTabsItem = new MenuItem 
+        { 
+            Header = "Close All Tabs", 
+            InputGestureText = "Ctrl+Shift+W",
+            Icon = new Wpf.Ui.Controls.SymbolIcon { Symbol = Wpf.Ui.Controls.SymbolRegular.DismissSquareMultiple20 }
+        };
+        closeAllTabsItem.Click += (_, _) => CloseAllTabs();
+        tabMenu.Items.Add(closeAllTabsItem);
+
+        tab.ContextMenu = tabMenu;
+
         Tabs.Items.Add(tab);
         Tabs.SelectedItem = tab;
         return ctx;
@@ -328,6 +353,46 @@ public partial class MainWindow : FluentWindow
         if (Tabs.Items.Count == 0) NewTab();
 
         SaveSessionState();
+    }
+
+    private void CloseAllTabs()
+    {
+        var tabsToClose = Tabs.Items.Cast<TabItem>().Select(t => t.Tag as TabContext).Where(c => c != null).Cast<TabContext>().ToList();
+        foreach (var ctx in tabsToClose)
+        {
+            if (Tabs.Items.Contains(ctx.Tab))
+            {
+                if (ctx.IsDirty)
+                {
+                    Tabs.SelectedItem = ctx.Tab;
+                    var r = MessageBox.Show(this, $"Save changes to {ctx.DisplayName}?",
+                        "HyperNote", MessageBoxButton.YesNoCancel, MessageBoxImage.Warning);
+                    if (r == MessageBoxResult.Cancel)
+                    {
+                        return;
+                    }
+                    if (r == MessageBoxResult.Yes)
+                    {
+                        if (!SaveTab(ctx))
+                        {
+                            return;
+                        }
+                    }
+                }
+
+                bool wasDirty = ctx.IsDirty;
+                ctx.IsDirty = false;
+                try
+                {
+                    CloseTab(ctx);
+                }
+                catch
+                {
+                    ctx.IsDirty = wasDirty;
+                    throw;
+                }
+            }
+        }
     }
 
     private bool ConfirmDiscard(TabContext ctx)
@@ -1306,6 +1371,11 @@ public partial class MainWindow : FluentWindow
     private void CloseTab_Executed(object s, ExecutedRoutedEventArgs e)
     {
         if (CurrentContext != null) CloseTab(CurrentContext);
+    }
+
+    private void CloseAllTabs_Executed(object s, ExecutedRoutedEventArgs e)
+    {
+        CloseAllTabs();
     }
 
     private void Print_Executed(object s, ExecutedRoutedEventArgs e)
@@ -2450,6 +2520,9 @@ public partial class MainWindow : FluentWindow
                 break;
             case "File.CloseTab":
                 ApplicationCommands.Close.Execute(null, this);
+                break;
+            case "File.CloseAllTabs":
+                CloseAllTabsCommand.Execute(null, this);
                 break;
             case "File.Exit":
                 Exit_Click(this, new RoutedEventArgs());
